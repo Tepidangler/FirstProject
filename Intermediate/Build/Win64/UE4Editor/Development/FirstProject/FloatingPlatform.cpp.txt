@@ -1,0 +1,3 @@
+D:\Unreal Projects\FirstProject\Intermediate\Build\Win64\UE4Editor\Development\FirstProject\Definitions.FirstProject.h
+D:\Unreal Projects\FirstProject\Source\FirstProject\FloatingPlatform.h
+D:\Unreal Projects\FirstProject\Intermediate\Build\Win64\UE4Editor\Inc\FirstProject\FloatingPlatform.generated.h

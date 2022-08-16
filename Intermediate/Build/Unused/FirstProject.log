@@ -1,0 +1,10 @@
+﻿  Cleaning FirstProjectEditor and UnrealHeaderTool binaries...
+UnrealBuildTool : error : Couldn't find target rules file for target 'FirstProjectEditor' in rules assembly 'UE4Rules, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null'.
+                          Location: C:\Program Files\Epic Games\UE_4.27\Engine\Intermediate\Build\BuildRules\UE4Rules.dll
+                          Target rules found:
+  Using 'git status' to determine working set for adaptive non-unity build (D:\Unreal Projects\FirstProject).
+  Invalidating makefile for FirstProjectEditor (source file removed)
+UnrealBuildTool : error : Couldn't find target rules file for target 'FirstProjectEditor' in rules assembly 'UE4Rules, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null'.
+                          Location: C:\Program Files\Epic Games\UE_4.27\Engine\Intermediate\Build\BuildRules\UE4Rules.dll
+                          Target rules found:
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.MakeFile.Targets(50,5): error MSB3073: The command ""C:\Program Files\Epic Games\UE_4.27\Engine\Build\BatchFiles\Rebuild.bat" FirstProjectEditor Win64 Development -Project="D:\Unreal Projects\FirstProject\FirstProject.uproject" -WaitMutex -FromMsBuild" exited with code -1.

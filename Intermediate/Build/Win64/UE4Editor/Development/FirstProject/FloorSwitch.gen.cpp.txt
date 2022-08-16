@@ -1,0 +1,7 @@
+D:\Unreal Projects\FirstProject\Intermediate\Build\Win64\UE4Editor\Development\FirstProject\Definitions.FirstProject.h
+C:\Program Files\Epic Games\UE_4.27\Engine\Source\Runtime\CoreUObject\Public\UObject/GeneratedCppIncludes.h
+C:\Program Files\Epic Games\UE_4.27\Engine\Source\Runtime\CoreUObject\Public\UObject/MetaData.h
+D:\Unreal Projects\FirstProject\Source\FirstProject/FloorSwitch.h
+D:\Unreal Projects\FirstProject\Source\FirstProject\SwitchBase.h
+D:\Unreal Projects\FirstProject\Intermediate\Build\Win64\UE4Editor\Inc\FirstProject\SwitchBase.generated.h
+D:\Unreal Projects\FirstProject\Intermediate\Build\Win64\UE4Editor\Inc\FirstProject\FloorSwitch.generated.h
