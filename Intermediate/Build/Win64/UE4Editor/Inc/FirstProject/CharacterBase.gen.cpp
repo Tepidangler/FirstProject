@@ -29,6 +29,10 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 	FIRSTPROJECT_API UClass* Z_Construct_UClass_AEnemyBase_NoRegister();
 	ENGINE_API UClass* Z_Construct_UClass_UParticleSystem_NoRegister();
 	ENGINE_API UClass* Z_Construct_UClass_USoundCue_NoRegister();
+	COREUOBJECT_API UClass* Z_Construct_UClass_UClass();
+	FIRSTPROJECT_API UClass* Z_Construct_UClass_AItemStorage_NoRegister();
+	FIRSTPROJECT_API UClass* Z_Construct_UClass_UFirstSaveGame_NoRegister();
+	FIRSTPROJECT_API UClass* Z_Construct_UClass_UFirstInterface_NoRegister();
 // End Cross Module References
 	static UEnum* EStaminaStatus_StaticEnum()
 	{
@@ -157,6 +161,36 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 		}
 		return ReturnEnum;
 	}
+	DEFINE_FUNCTION(ACharacterBase::execLoadGame)
+	{
+		P_GET_UBOOL(Z_Param_bSetPosition);
+		P_FINISH;
+		P_NATIVE_BEGIN;
+		P_THIS->LoadGame(Z_Param_bSetPosition);
+		P_NATIVE_END;
+	}
+	DEFINE_FUNCTION(ACharacterBase::execSaveGame)
+	{
+		P_FINISH;
+		P_NATIVE_BEGIN;
+		P_THIS->SaveGame();
+		P_NATIVE_END;
+	}
+	DEFINE_FUNCTION(ACharacterBase::execSwitchLevel)
+	{
+		P_GET_PROPERTY(FNameProperty,Z_Param_LevelName);
+		P_FINISH;
+		P_NATIVE_BEGIN;
+		P_THIS->SwitchLevel(Z_Param_LevelName);
+		P_NATIVE_END;
+	}
+	DEFINE_FUNCTION(ACharacterBase::execUpdateCombatTarget)
+	{
+		P_FINISH;
+		P_NATIVE_BEGIN;
+		P_THIS->UpdateCombatTarget();
+		P_NATIVE_END;
+	}
 	DEFINE_FUNCTION(ACharacterBase::execPlaySwingSound)
 	{
 		P_FINISH;
@@ -200,8 +234,12 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 			{ "AttackEnd", &ACharacterBase::execAttackEnd },
 			{ "DeathEnd", &ACharacterBase::execDeathEnd },
 			{ "Die", &ACharacterBase::execDie },
+			{ "LoadGame", &ACharacterBase::execLoadGame },
 			{ "PlaySwingSound", &ACharacterBase::execPlaySwingSound },
+			{ "SaveGame", &ACharacterBase::execSaveGame },
 			{ "ShowPickupLocations", &ACharacterBase::execShowPickupLocations },
+			{ "SwitchLevel", &ACharacterBase::execSwitchLevel },
+			{ "UpdateCombatTarget", &ACharacterBase::execUpdateCombatTarget },
 		};
 		FNativeFunctionRegistrar::RegisterFunctions(Class, Funcs, UE_ARRAY_COUNT(Funcs));
 	}
@@ -282,6 +320,43 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 		}
 		return ReturnFunction;
 	}
+	struct Z_Construct_UFunction_ACharacterBase_LoadGame_Statics
+	{
+		struct CharacterBase_eventLoadGame_Parms
+		{
+			bool bSetPosition;
+		};
+		static void NewProp_bSetPosition_SetBit(void* Obj);
+		static const UE4CodeGen_Private::FBoolPropertyParams NewProp_bSetPosition;
+		static const UE4CodeGen_Private::FPropertyParamsBase* const PropPointers[];
+#if WITH_METADATA
+		static const UE4CodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
+#endif
+		static const UE4CodeGen_Private::FFunctionParams FuncParams;
+	};
+	void Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::NewProp_bSetPosition_SetBit(void* Obj)
+	{
+		((CharacterBase_eventLoadGame_Parms*)Obj)->bSetPosition = 1;
+	}
+	const UE4CodeGen_Private::FBoolPropertyParams Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::NewProp_bSetPosition = { "bSetPosition", nullptr, (EPropertyFlags)0x0010000000000080, UE4CodeGen_Private::EPropertyGenFlags::Bool | UE4CodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(CharacterBase_eventLoadGame_Parms), &Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::NewProp_bSetPosition_SetBit, METADATA_PARAMS(nullptr, 0) };
+	const UE4CodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::PropPointers[] = {
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::NewProp_bSetPosition,
+	};
+#if WITH_METADATA
+	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::Function_MetaDataParams[] = {
+		{ "ModuleRelativePath", "CharacterBase.h" },
+	};
+#endif
+	const UE4CodeGen_Private::FFunctionParams Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_ACharacterBase, nullptr, "LoadGame", nullptr, nullptr, sizeof(CharacterBase_eventLoadGame_Parms), Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x04020401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UFunction_ACharacterBase_LoadGame()
+	{
+		static UFunction* ReturnFunction = nullptr;
+		if (!ReturnFunction)
+		{
+			UE4CodeGen_Private::ConstructUFunction(ReturnFunction, Z_Construct_UFunction_ACharacterBase_LoadGame_Statics::FuncParams);
+		}
+		return ReturnFunction;
+	}
 	struct Z_Construct_UFunction_ACharacterBase_PlaySwingSound_Statics
 	{
 #if WITH_METADATA
@@ -304,6 +379,28 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 		}
 		return ReturnFunction;
 	}
+	struct Z_Construct_UFunction_ACharacterBase_SaveGame_Statics
+	{
+#if WITH_METADATA
+		static const UE4CodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
+#endif
+		static const UE4CodeGen_Private::FFunctionParams FuncParams;
+	};
+#if WITH_METADATA
+	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_ACharacterBase_SaveGame_Statics::Function_MetaDataParams[] = {
+		{ "ModuleRelativePath", "CharacterBase.h" },
+	};
+#endif
+	const UE4CodeGen_Private::FFunctionParams Z_Construct_UFunction_ACharacterBase_SaveGame_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_ACharacterBase, nullptr, "SaveGame", nullptr, nullptr, 0, nullptr, 0, RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x04020401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_ACharacterBase_SaveGame_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_ACharacterBase_SaveGame_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UFunction_ACharacterBase_SaveGame()
+	{
+		static UFunction* ReturnFunction = nullptr;
+		if (!ReturnFunction)
+		{
+			UE4CodeGen_Private::ConstructUFunction(ReturnFunction, Z_Construct_UFunction_ACharacterBase_SaveGame_Statics::FuncParams);
+		}
+		return ReturnFunction;
+	}
 	struct Z_Construct_UFunction_ACharacterBase_ShowPickupLocations_Statics
 	{
 #if WITH_METADATA
@@ -323,6 +420,60 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 		if (!ReturnFunction)
 		{
 			UE4CodeGen_Private::ConstructUFunction(ReturnFunction, Z_Construct_UFunction_ACharacterBase_ShowPickupLocations_Statics::FuncParams);
+		}
+		return ReturnFunction;
+	}
+	struct Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics
+	{
+		struct CharacterBase_eventSwitchLevel_Parms
+		{
+			FName LevelName;
+		};
+		static const UE4CodeGen_Private::FNamePropertyParams NewProp_LevelName;
+		static const UE4CodeGen_Private::FPropertyParamsBase* const PropPointers[];
+#if WITH_METADATA
+		static const UE4CodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
+#endif
+		static const UE4CodeGen_Private::FFunctionParams FuncParams;
+	};
+	const UE4CodeGen_Private::FNamePropertyParams Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics::NewProp_LevelName = { "LevelName", nullptr, (EPropertyFlags)0x0010000000000080, UE4CodeGen_Private::EPropertyGenFlags::Name, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(CharacterBase_eventSwitchLevel_Parms, LevelName), METADATA_PARAMS(nullptr, 0) };
+	const UE4CodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics::PropPointers[] = {
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics::NewProp_LevelName,
+	};
+#if WITH_METADATA
+	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics::Function_MetaDataParams[] = {
+		{ "ModuleRelativePath", "CharacterBase.h" },
+	};
+#endif
+	const UE4CodeGen_Private::FFunctionParams Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_ACharacterBase, nullptr, "SwitchLevel", nullptr, nullptr, sizeof(CharacterBase_eventSwitchLevel_Parms), Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00020401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UFunction_ACharacterBase_SwitchLevel()
+	{
+		static UFunction* ReturnFunction = nullptr;
+		if (!ReturnFunction)
+		{
+			UE4CodeGen_Private::ConstructUFunction(ReturnFunction, Z_Construct_UFunction_ACharacterBase_SwitchLevel_Statics::FuncParams);
+		}
+		return ReturnFunction;
+	}
+	struct Z_Construct_UFunction_ACharacterBase_UpdateCombatTarget_Statics
+	{
+#if WITH_METADATA
+		static const UE4CodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
+#endif
+		static const UE4CodeGen_Private::FFunctionParams FuncParams;
+	};
+#if WITH_METADATA
+	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_ACharacterBase_UpdateCombatTarget_Statics::Function_MetaDataParams[] = {
+		{ "ModuleRelativePath", "CharacterBase.h" },
+	};
+#endif
+	const UE4CodeGen_Private::FFunctionParams Z_Construct_UFunction_ACharacterBase_UpdateCombatTarget_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_ACharacterBase, nullptr, "UpdateCombatTarget", nullptr, nullptr, 0, nullptr, 0, RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00020401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_ACharacterBase_UpdateCombatTarget_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_ACharacterBase_UpdateCombatTarget_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UFunction_ACharacterBase_UpdateCombatTarget()
+	{
+		static UFunction* ReturnFunction = nullptr;
+		if (!ReturnFunction)
+		{
+			UE4CodeGen_Private::ConstructUFunction(ReturnFunction, Z_Construct_UFunction_ACharacterBase_UpdateCombatTarget_Statics::FuncParams);
 		}
 		return ReturnFunction;
 	}
@@ -391,6 +542,10 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 #endif
 		static const UE4CodeGen_Private::FObjectPropertyParams NewProp_CombatMontage;
 #if WITH_METADATA
+		static const UE4CodeGen_Private::FMetaDataPairParam NewProp_LevelStartMontage_MetaData[];
+#endif
+		static const UE4CodeGen_Private::FObjectPropertyParams NewProp_LevelStartMontage;
+#if WITH_METADATA
 		static const UE4CodeGen_Private::FMetaDataPairParam NewProp_BaseTurnRate_MetaData[];
 #endif
 		static const UE4CodeGen_Private::FFloatPropertyParams NewProp_BaseTurnRate;
@@ -427,6 +582,23 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 #endif
 		static const UE4CodeGen_Private::FObjectPropertyParams NewProp_HitSound;
 #if WITH_METADATA
+		static const UE4CodeGen_Private::FMetaDataPairParam NewProp_SwingSwordEffortSound_MetaData[];
+#endif
+		static const UE4CodeGen_Private::FObjectPropertyParams NewProp_SwingSwordEffortSound;
+#if WITH_METADATA
+		static const UE4CodeGen_Private::FMetaDataPairParam NewProp_EnemyFilter_MetaData[];
+#endif
+		static const UE4CodeGen_Private::FClassPropertyParams NewProp_EnemyFilter;
+#if WITH_METADATA
+		static const UE4CodeGen_Private::FMetaDataPairParam NewProp_WeaponStorage_MetaData[];
+#endif
+		static const UE4CodeGen_Private::FClassPropertyParams NewProp_WeaponStorage;
+		static const UE4CodeGen_Private::FObjectPropertyParams NewProp_SavedGameArray_Inner;
+#if WITH_METADATA
+		static const UE4CodeGen_Private::FMetaDataPairParam NewProp_SavedGameArray_MetaData[];
+#endif
+		static const UE4CodeGen_Private::FArrayPropertyParams NewProp_SavedGameArray;
+#if WITH_METADATA
 		static const UE4CodeGen_Private::FMetaDataPairParam NewProp_MaxHealth_MetaData[];
 #endif
 		static const UE4CodeGen_Private::FFloatPropertyParams NewProp_MaxHealth;
@@ -447,6 +619,7 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 #endif
 		static const UE4CodeGen_Private::FIntPropertyParams NewProp_Dirhams;
 		static const UE4CodeGen_Private::FPropertyParamsBase* const PropPointers[];
+		static const UE4CodeGen_Private::FImplementedInterfaceParams InterfaceParams[];
 		static const FCppClassTypeInfoStatic StaticCppClassTypeInfo;
 		static const UE4CodeGen_Private::FClassParams ClassParams;
 	};
@@ -458,8 +631,12 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 		{ &Z_Construct_UFunction_ACharacterBase_AttackEnd, "AttackEnd" }, // 3241209505
 		{ &Z_Construct_UFunction_ACharacterBase_DeathEnd, "DeathEnd" }, // 268281625
 		{ &Z_Construct_UFunction_ACharacterBase_Die, "Die" }, // 2261886567
+		{ &Z_Construct_UFunction_ACharacterBase_LoadGame, "LoadGame" }, // 3204941078
 		{ &Z_Construct_UFunction_ACharacterBase_PlaySwingSound, "PlaySwingSound" }, // 3290634481
+		{ &Z_Construct_UFunction_ACharacterBase_SaveGame, "SaveGame" }, // 2866619515
 		{ &Z_Construct_UFunction_ACharacterBase_ShowPickupLocations, "ShowPickupLocations" }, // 4194846881
+		{ &Z_Construct_UFunction_ACharacterBase_SwitchLevel, "SwitchLevel" }, // 3717188064
+		{ &Z_Construct_UFunction_ACharacterBase_UpdateCombatTarget, "UpdateCombatTarget" }, // 273133596
 	};
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_ACharacterBase_Statics::Class_MetaDataParams[] = {
@@ -499,7 +676,7 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 		{ "ModuleRelativePath", "CharacterBase.h" },
 	};
 #endif
-	const UE4CodeGen_Private::FObjectPropertyParams Z_Construct_UClass_ACharacterBase_Statics::NewProp_EquippedWeapon = { "EquippedWeapon", nullptr, (EPropertyFlags)0x0010000000010015, UE4CodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(ACharacterBase, EquippedWeapon), Z_Construct_UClass_AWeaponBase_NoRegister, METADATA_PARAMS(Z_Construct_UClass_ACharacterBase_Statics::NewProp_EquippedWeapon_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::NewProp_EquippedWeapon_MetaData)) };
+	const UE4CodeGen_Private::FObjectPropertyParams Z_Construct_UClass_ACharacterBase_Statics::NewProp_EquippedWeapon = { "EquippedWeapon", nullptr, (EPropertyFlags)0x0010000000020015, UE4CodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(ACharacterBase, EquippedWeapon), Z_Construct_UClass_AWeaponBase_NoRegister, METADATA_PARAMS(Z_Construct_UClass_ACharacterBase_Statics::NewProp_EquippedWeapon_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::NewProp_EquippedWeapon_MetaData)) };
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_ACharacterBase_Statics::NewProp_ActiveOverlappingItem_MetaData[] = {
 		{ "Category", "Items" },
@@ -575,6 +752,13 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 #endif
 	const UE4CodeGen_Private::FObjectPropertyParams Z_Construct_UClass_ACharacterBase_Statics::NewProp_CombatMontage = { "CombatMontage", nullptr, (EPropertyFlags)0x0010000000010015, UE4CodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(ACharacterBase, CombatMontage), Z_Construct_UClass_UAnimMontage_NoRegister, METADATA_PARAMS(Z_Construct_UClass_ACharacterBase_Statics::NewProp_CombatMontage_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::NewProp_CombatMontage_MetaData)) };
 #if WITH_METADATA
+	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_ACharacterBase_Statics::NewProp_LevelStartMontage_MetaData[] = {
+		{ "Category", "Anims" },
+		{ "ModuleRelativePath", "CharacterBase.h" },
+	};
+#endif
+	const UE4CodeGen_Private::FObjectPropertyParams Z_Construct_UClass_ACharacterBase_Statics::NewProp_LevelStartMontage = { "LevelStartMontage", nullptr, (EPropertyFlags)0x0010000000010015, UE4CodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(ACharacterBase, LevelStartMontage), Z_Construct_UClass_UAnimMontage_NoRegister, METADATA_PARAMS(Z_Construct_UClass_ACharacterBase_Statics::NewProp_LevelStartMontage_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::NewProp_LevelStartMontage_MetaData)) };
+#if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_ACharacterBase_Statics::NewProp_BaseTurnRate_MetaData[] = {
 		{ "Category", "Camera" },
 		{ "Comment", "/** Base turn rates to scale turning functions for the camera*/" },
@@ -640,6 +824,35 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 #endif
 	const UE4CodeGen_Private::FObjectPropertyParams Z_Construct_UClass_ACharacterBase_Statics::NewProp_HitSound = { "HitSound", nullptr, (EPropertyFlags)0x0010000000000005, UE4CodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(ACharacterBase, HitSound), Z_Construct_UClass_USoundCue_NoRegister, METADATA_PARAMS(Z_Construct_UClass_ACharacterBase_Statics::NewProp_HitSound_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::NewProp_HitSound_MetaData)) };
 #if WITH_METADATA
+	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_ACharacterBase_Statics::NewProp_SwingSwordEffortSound_MetaData[] = {
+		{ "Category", "Sound" },
+		{ "ModuleRelativePath", "CharacterBase.h" },
+	};
+#endif
+	const UE4CodeGen_Private::FObjectPropertyParams Z_Construct_UClass_ACharacterBase_Statics::NewProp_SwingSwordEffortSound = { "SwingSwordEffortSound", nullptr, (EPropertyFlags)0x0010000000000005, UE4CodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(ACharacterBase, SwingSwordEffortSound), Z_Construct_UClass_USoundCue_NoRegister, METADATA_PARAMS(Z_Construct_UClass_ACharacterBase_Statics::NewProp_SwingSwordEffortSound_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::NewProp_SwingSwordEffortSound_MetaData)) };
+#if WITH_METADATA
+	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_ACharacterBase_Statics::NewProp_EnemyFilter_MetaData[] = {
+		{ "Category", "Combat" },
+		{ "ModuleRelativePath", "CharacterBase.h" },
+	};
+#endif
+	const UE4CodeGen_Private::FClassPropertyParams Z_Construct_UClass_ACharacterBase_Statics::NewProp_EnemyFilter = { "EnemyFilter", nullptr, (EPropertyFlags)0x0014000000000005, UE4CodeGen_Private::EPropertyGenFlags::Class, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(ACharacterBase, EnemyFilter), Z_Construct_UClass_AEnemyBase_NoRegister, Z_Construct_UClass_UClass, METADATA_PARAMS(Z_Construct_UClass_ACharacterBase_Statics::NewProp_EnemyFilter_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::NewProp_EnemyFilter_MetaData)) };
+#if WITH_METADATA
+	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_ACharacterBase_Statics::NewProp_WeaponStorage_MetaData[] = {
+		{ "Category", "Save Data" },
+		{ "ModuleRelativePath", "CharacterBase.h" },
+	};
+#endif
+	const UE4CodeGen_Private::FClassPropertyParams Z_Construct_UClass_ACharacterBase_Statics::NewProp_WeaponStorage = { "WeaponStorage", nullptr, (EPropertyFlags)0x0014000000010001, UE4CodeGen_Private::EPropertyGenFlags::Class, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(ACharacterBase, WeaponStorage), Z_Construct_UClass_AItemStorage_NoRegister, Z_Construct_UClass_UClass, METADATA_PARAMS(Z_Construct_UClass_ACharacterBase_Statics::NewProp_WeaponStorage_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::NewProp_WeaponStorage_MetaData)) };
+	const UE4CodeGen_Private::FObjectPropertyParams Z_Construct_UClass_ACharacterBase_Statics::NewProp_SavedGameArray_Inner = { "SavedGameArray", nullptr, (EPropertyFlags)0x0000000000020000, UE4CodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, 0, Z_Construct_UClass_UFirstSaveGame_NoRegister, METADATA_PARAMS(nullptr, 0) };
+#if WITH_METADATA
+	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_ACharacterBase_Statics::NewProp_SavedGameArray_MetaData[] = {
+		{ "Category", "Save Data" },
+		{ "ModuleRelativePath", "CharacterBase.h" },
+	};
+#endif
+	const UE4CodeGen_Private::FArrayPropertyParams Z_Construct_UClass_ACharacterBase_Statics::NewProp_SavedGameArray = { "SavedGameArray", nullptr, (EPropertyFlags)0x0010000000020015, UE4CodeGen_Private::EPropertyGenFlags::Array, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(ACharacterBase, SavedGameArray), EArrayPropertyFlags::None, METADATA_PARAMS(Z_Construct_UClass_ACharacterBase_Statics::NewProp_SavedGameArray_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::NewProp_SavedGameArray_MetaData)) };
+#if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_ACharacterBase_Statics::NewProp_MaxHealth_MetaData[] = {
 		{ "Category", "PlayerStats" },
 		{ "Comment", "/**\n\x09* \n\x09* \n\x09* Player Stats\n\x09* \n\x09* \n\x09*/" },
@@ -691,6 +904,7 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_CameraBoom,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_FollowCamera,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_CombatMontage,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_LevelStartMontage,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_BaseTurnRate,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_BaseLookUpRate,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_RunningSpeed,
@@ -700,12 +914,20 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_CombatTarget,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_HitParticles,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_HitSound,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_SwingSwordEffortSound,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_EnemyFilter,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_WeaponStorage,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_SavedGameArray_Inner,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_SavedGameArray,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_MaxHealth,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_Health,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_MaxStamina,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_Stamina,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_ACharacterBase_Statics::NewProp_Dirhams,
 	};
+		const UE4CodeGen_Private::FImplementedInterfaceParams Z_Construct_UClass_ACharacterBase_Statics::InterfaceParams[] = {
+			{ Z_Construct_UClass_UFirstInterface_NoRegister, (int32)VTABLE_OFFSET(ACharacterBase, IFirstInterface), false },
+		};
 	const FCppClassTypeInfoStatic Z_Construct_UClass_ACharacterBase_Statics::StaticCppClassTypeInfo = {
 		TCppClassTypeTraits<ACharacterBase>::IsAbstract,
 	};
@@ -716,11 +938,11 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 		DependentSingletons,
 		FuncInfo,
 		Z_Construct_UClass_ACharacterBase_Statics::PropPointers,
-		nullptr,
+		InterfaceParams,
 		UE_ARRAY_COUNT(DependentSingletons),
 		UE_ARRAY_COUNT(FuncInfo),
 		UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::PropPointers),
-		0,
+		UE_ARRAY_COUNT(InterfaceParams),
 		0x009000A4u,
 		METADATA_PARAMS(Z_Construct_UClass_ACharacterBase_Statics::Class_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UClass_ACharacterBase_Statics::Class_MetaDataParams))
 	};
@@ -733,7 +955,7 @@ void EmptyLinkFunctionForGeneratedCodeCharacterBase() {}
 		}
 		return OuterClass;
 	}
-	IMPLEMENT_CLASS(ACharacterBase, 3535761755);
+	IMPLEMENT_CLASS(ACharacterBase, 357431754);
 	template<> FIRSTPROJECT_API UClass* StaticClass<ACharacterBase>()
 	{
 		return ACharacterBase::StaticClass();

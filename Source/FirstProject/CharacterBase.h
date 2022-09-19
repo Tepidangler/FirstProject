@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "FirstInterface.h"
 #include "CharacterBase.generated.h"
 
 UENUM(BlueprintType)
@@ -28,7 +29,7 @@ enum class EStaminaStatus : uint8
 };
 
 UCLASS()
-class FIRSTPROJECT_API ACharacterBase : public ACharacter
+class FIRSTPROJECT_API ACharacterBase : public ACharacter, public IFirstInterface
 {
 	GENERATED_BODY()
 
@@ -45,7 +46,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Category = "Combat")
 	FVector CombatTargetLocation;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
 	class AWeaponBase* EquippedWeapon;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
@@ -77,6 +78,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
 	class UAnimMontage* CombatMontage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
+	UAnimMontage* LevelStartMontage;
+
 	/** Base turn rates to scale turning functions for the camera*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;
@@ -94,6 +98,8 @@ public:
 
 	bool bActionDown;
 
+	bool bESCDown;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Movement")
 	float StaminaDrainRate;
 
@@ -109,11 +115,27 @@ public:
 
 	FTimerHandle ComboTimerHandle;
 
+	bool bIsComboStarted;
+
+	bool bAllowMovement;
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Particles")
 	class UParticleSystem* HitParticles;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	class USoundCue* HitSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundCue* SwingSwordEffortSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TSubclassOf<AEnemyBase> EnemyFilter;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Save Data")
+	TSubclassOf<class AItemStorage> WeaponStorage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Save Data")
+	TArray<class UFirstSaveGame*> SavedGameArray;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -178,6 +200,10 @@ public:
 	//Function for attacking
 	void Attack();
 
+	void ESCDown();
+
+	void ESCUp();
+
 	void SetInterpToEnemy(bool Interp);
 
 	bool Alive();
@@ -195,6 +221,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PlaySwingSound();
 
+	UFUNCTION()
+	void UpdateCombatTarget();
+
+	UFUNCTION()
+	void SwitchLevel(FName LevelName);
+
+	UFUNCTION(BlueprintCallable)
+	void SaveGame();
+	UFUNCTION(BlueprintCallable)
+	void LoadGame(bool bSetPosition);
+
+	ACharacterBase* SetPlayerRef_Implementation() override;
+
+
+	FORCEINLINE void SetAllowMovementStatus(bool Status) { bAllowMovement = Status; }
 	FORCEINLINE void SetStaminaStatus(EStaminaStatus Status) { StaminaStatus = Status; }
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 

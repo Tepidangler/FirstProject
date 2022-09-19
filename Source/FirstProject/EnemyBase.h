@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "FirstInterface.h"
 #include "EnemyBase.generated.h"
 
 UENUM(BlueprintType)
@@ -21,7 +22,7 @@ enum class EEnemyMovementStatus : uint8
 
 
 UCLASS()
-class FIRSTPROJECT_API AEnemyBase : public ACharacter
+class FIRSTPROJECT_API AEnemyBase : public ACharacter, public IFirstInterface
 {
 	GENERATED_BODY()
 
@@ -34,6 +35,9 @@ public: //Variables
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class USphereComponent* AgroSphere;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	bool bOverlappingAgroSphere;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	USphereComponent* CombatSphere;
@@ -49,6 +53,9 @@ public: //Variables
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	USoundCue* SwingSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundCue* EffortSound;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class AAIController* AIController;
@@ -66,6 +73,8 @@ public: //Variables
 
 	FTimerHandle DeathTimer;
 
+	FHitResult CastHit;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float DeathDelay;
 
@@ -80,6 +89,8 @@ public: //Variables
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	float Damage;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	float Desperation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	class UParticleSystem* HitParticles;
@@ -94,8 +105,35 @@ public: //Variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bAttacking;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bMeleeCombat;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	bool bIsBossEnemy;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bShooting;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bLeftGunFiring;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bRightGunFiring;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bUltimateAttack;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bCharging;
+
+	//Particles emitted when weapon fired
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particles")
+	UParticleSystem* WeaponFireParticles;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	TSubclassOf<UDamageType> DamageTypeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | Projectile")
+	FVector MuzzleOffset;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat | Projectile")
+	TSubclassOf<class AProjectileBase> ProjectileClass;
 
 	bool bHasValidTarget;
 
@@ -140,6 +178,11 @@ public:
 	UFUNCTION()
 		virtual void RightCombatCollisionOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	virtual void GetActorEyesViewPoint(FVector &Location, FRotator &Rotation) const override;
+
+	UFUNCTION()
+	bool Raycast(FHitResult &HitResult);
+
 	UFUNCTION(BlueprintCallable)
 		void ActivateCollision();
 	UFUNCTION(BlueprintCallable)
@@ -152,23 +195,50 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RightCombatAboutToCollide();
 
+	UFUNCTION(BlueprintCallable)
+	void LeftGunAboutToFire();
+	UFUNCTION(BlueprintCallable)
+	void RightGunAboutToFire();
+	UFUNCTION(BlueprintCallable)
+	void UltimateAttackEnd();
 
 	UFUNCTION()
 	void Attack();
 
 	UFUNCTION(BlueprintCallable)
+	void SpawnMuzzleFlashParticles();
+
+	UFUNCTION(BlueprintCallable)
+	void PlayEffortSound();
+
+	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
+
+	UFUNCTION()
+	float CalculateDesperation();
+
+	UFUNCTION()
+	bool IsCharacterInView();
 
 	UFUNCTION(BlueprintCallable)
 	void MoveToTarget(class ACharacterBase* Target);
 
+	AEnemyBase* SetEnemyRef_Implementation() override;
+
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-	void Die();
+
+	void Die(AActor* Causer);
 
 	UFUNCTION(BlueprintCallable)
-	void DeathEnd();
+		void DeathEnd();
 
 	void Disappear();
 
 	bool Alive();
+
+
+
+	AProjectileBase* Projectile;
+
+
 };

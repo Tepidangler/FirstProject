@@ -15,12 +15,16 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "EnemyBase.h"
 #include "MainPlayerController.h"
+#include "FirstSaveGame.h"
+#include "ItemStorage.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
 	/** Create Camera Boom. Pulls Towards player if there's a collision */
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));
@@ -60,6 +64,11 @@ ACharacterBase::ACharacterBase()
 	//Setting Interpolation Speed
 	InterpSpeed = 15.f;
 
+	Health = 100.f;
+	MaxHealth = 100.f;
+	Stamina = 100.f;
+	MaxStamina = 100.f;
+
 	bMovingForward = false;
 	bMovingRight = false;
 	bShiftKeyDown = false;
@@ -68,10 +77,15 @@ ACharacterBase::ACharacterBase()
 	bIsInAir = false;
 	bInterpToEnemy = false;
 	bHasCombatTarget = false;
+	bIsComboStarted = false;
+	bESCDown = false;
 
 	//Initialize Enums
 	MovementStatus = EMovementStatus::EMS_Normal;
 	StaminaStatus = EStaminaStatus::ESS_Normal;
+
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -81,18 +95,17 @@ void ACharacterBase::BeginPlay()
 	//UKismetSystemLibrary::DrawDebugSphere(this, GetActorLocation() + FVector(0.f,0.f,175.f), 25.f, 8, FLinearColor::Green, 10.f, .5f);
 	
 	MainPlayerController = Cast<AMainPlayerController>(GetController());
+	bAllowMovement = false;
 }
 
 // Called every frame
 void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
 
 	//bIsInAir = this->GetCharacterMovement()->IsFalling();
 	//Caluclating how much will drain this frame with delta time
 	if (Alive() == false) return;
-
 	float DeltaStamina = StaminaDrainRate * DeltaTime;
 	switch (StaminaStatus)
 	{
@@ -294,6 +307,9 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacterBase::LMBDown);
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &ACharacterBase::LMBUp);
+
+	PlayerInputComponent->BindAction("OpenPauseMenu", IE_Pressed, this, &ACharacterBase::ESCDown);
+	PlayerInputComponent->BindAction("OpenPauseMenu", IE_Released, this, &ACharacterBase::ESCUp);
 	
 }
 
@@ -301,7 +317,7 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 void ACharacterBase::MoveForward(float Value)
 {
 	bMovingForward = false;
-	if (Controller != nullptr && Value != 0.f && !bAttacking && Alive())
+	if (Controller != nullptr && Value != 0.f && !bAttacking && Alive() && bAllowMovement)
 	{
 		//find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -326,7 +342,7 @@ void ACharacterBase::MoveForward(float Value)
 void ACharacterBase::MoveRight(float Value)
 {
 	bMovingRight = false;
-	if (Controller != nullptr && Value != 0.f && !bAttacking && Alive())
+	if (Controller != nullptr && Value != 0.f && !bAttacking && Alive() && bAllowMovement)
 	{
 		//find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -406,7 +422,7 @@ void ACharacterBase::Die()
 		AnimInstance->Montage_Play(CombatMontage, 1.f);
 		AnimInstance->Montage_JumpToSection(FName("Death"));
 		//AnimInstance->Montage_Stop(1.f, CombatMontage);
-		GetWorld()->GetTimerManager().PauseTimer(ComboTimerHandle);
+		//GetWorld()->GetTimerManager().PauseTimer(ComboTimerHandle);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	SetMovementStatus(EMovementStatus::EMS_Dead);
@@ -480,7 +496,7 @@ void ACharacterBase::ActionUp()
 
 void ACharacterBase::LMBDown()
 {
-	if (Alive() == false) return;
+	if (!Alive()) return;
 
 	if (!bAttacking)
 	{
@@ -516,7 +532,7 @@ void ACharacterBase::Attack()
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && CombatMontage)
 		{
-			if (GetWorld()->GetTimerManager().IsTimerActive(ComboTimerHandle) == false)
+			if (bIsComboStarted == false)
 			{
 				int32 Section = FMath::RandRange(0, 3);
 				switch (Section)
@@ -524,24 +540,28 @@ void ACharacterBase::Attack()
 				case 0:
 					AnimInstance->Montage_Play(CombatMontage, 1.35f);
 					AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_1"), CombatMontage);
-					GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, 1.5f, true, 1.5f);
+					bIsComboStarted = true;
+					//GetWorldTimerManager().SetTimer(ComboTimerHandle, 1.5f, false);
 					break;
 
 				case 1:
 					AnimInstance->Montage_Play(CombatMontage, 1.35f);
 					AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_B"), CombatMontage);
-					GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, 1.5f, true, 1.5f);
+					bIsComboStarted = true;
+					//GetWorldTimerManager().SetTimer(ComboTimerHandle, 1.5f, false);
 					break;
 
 				case 2:
 					AnimInstance->Montage_Play(CombatMontage, 1.35f);
 					AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_C"), CombatMontage);
-					GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, 1.5f, true, 1.5f);
+					bIsComboStarted = true;
+					//GetWorldTimerManager().SetTimer(ComboTimerHandle, 1.5f, false);
 					break;
 				case 3:
 					AnimInstance->Montage_Play(CombatMontage, 1.35f);
 					AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_D"), CombatMontage);
-					GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, 1.5f, true, 1.5f);
+					bIsComboStarted = true;
+					//GetWorldTimerManager().SetTimer(ComboTimerHandle, 1.5f, false);
 					break;
 
 				default:
@@ -560,15 +580,20 @@ void ACharacterBase::Attack()
 					AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_Air"), CombatMontage);
 					AnimInstance->Montage_Stop(1.f, CombatMontage);
 				}
+				if (SwingSwordEffortSound)
+				{
+					UGameplayStatics::PlaySound2D(this, SwingSwordEffortSound);
+				}
 			}
-	}
+
+		}
 	
 		/**
 		if (EquippedWeapon->SwingSound)
 		{
 			UGameplayStatics::PlaySound2D(this, EquippedWeapon->SwingSound);
 		}
-		/**
+		
 		if (!bAttacking)
 		{
 			AttackEnd(FName("PrimaryAttack_Recover"));
@@ -577,6 +602,20 @@ void ACharacterBase::Attack()
 
 	}
 	
+}
+
+void ACharacterBase::ESCDown()
+{
+	bESCDown = true;
+	if (MainPlayerController)
+	{
+		MainPlayerController->TogglePauseMenu();
+	}
+}
+
+void ACharacterBase::ESCUp()
+{
+	bESCDown = false;
 }
 
 void ACharacterBase::SetInterpToEnemy(bool Interp)
@@ -629,6 +668,139 @@ void ACharacterBase::PlaySwingSound()
 	
 }
 
+void ACharacterBase::UpdateCombatTarget()
+{
+	TArray<AActor*> OverlappingActors;
+	GetOverlappingActors(OverlappingActors,EnemyFilter);
+
+	if (OverlappingActors.Num() == 0)
+	{
+		if (MainPlayerController)
+		{
+			MainPlayerController->RemoveEnemyHealthBar();
+		}
+		return;
+	}
+
+	AEnemyBase* ClosestEnemy = Cast<AEnemyBase>(OverlappingActors[0]);
+	if (ClosestEnemy)
+	{
+		FVector CharLocation = GetActorLocation();
+		float MinDistance = (ClosestEnemy->GetActorLocation() - GetActorLocation()).Size();
+		float Distance;
+
+		for (auto Actor : OverlappingActors)
+		{
+			AEnemyBase* Enemy = Cast<AEnemyBase>(Actor);
+			if (Enemy)
+			{
+				Distance = (Enemy->GetActorLocation() - GetActorLocation()).Size();
+				if (Distance < MinDistance)
+				{
+					MinDistance = Distance;
+					ClosestEnemy = Enemy;
+				}
+			}
+		}
+		if (MainPlayerController)
+		{
+			MainPlayerController->DisplayEnemyHealthBar();
+		}
+		SetCombatTarget(ClosestEnemy);
+		bHasCombatTarget = true;
+	}
+	
+
+
+
+}
+
+void ACharacterBase::SwitchLevel(FName LevelName)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FString CurrentLevel = World->GetMapName();
+
+		FName CurrentLevelName(*CurrentLevel);
+		if (CurrentLevelName != LevelName)
+		{
+			UGameplayStatics::OpenLevel(World, LevelName);
+		}
+	}
+
+}
+
+void ACharacterBase::SaveGame()
+{
+	UFirstSaveGame* SaveGameInstance = Cast<UFirstSaveGame>(UGameplayStatics::CreateSaveGameObject(UFirstSaveGame::StaticClass()));
+
+	SaveGameInstance->CharacterStats.Health = Health;
+	SaveGameInstance->CharacterStats.MaxHealth = MaxHealth;
+	SaveGameInstance->CharacterStats.Stamina = Stamina;
+	SaveGameInstance->CharacterStats.MaxStamina = MaxStamina;
+	SaveGameInstance->CharacterStats.Dirhams = Dirhams;
+	SaveGameInstance->CharacterStats.Location = GetActorLocation();
+	SaveGameInstance->CharacterStats.Rotation = GetActorRotation();
+	if (EquippedWeapon)
+	{
+		SaveGameInstance->CharacterStats.WeaponName = EquippedWeapon->WeaponName;
+	}
+
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SlotName, SaveGameInstance->UserIndex);
+
+	SavedGameArray.Add(SaveGameInstance);
+	
+}
+
+void ACharacterBase::LoadGame(bool bSetPosition)
+{
+	UFirstSaveGame* LoadGame = Cast<UFirstSaveGame>(UGameplayStatics::CreateSaveGameObject(UFirstSaveGame::StaticClass()));
+
+	UFirstSaveGame* LoadGameInstance = Cast<UFirstSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGame->SlotName, LoadGame->UserIndex));
+
+	if (LoadGameInstance)
+	{
+		Health = LoadGameInstance->CharacterStats.Health;
+		MaxHealth = LoadGameInstance->CharacterStats.MaxHealth;
+		Stamina = LoadGameInstance->CharacterStats.Stamina;
+		MaxStamina = LoadGameInstance->CharacterStats.MaxStamina;
+		Dirhams = LoadGameInstance->CharacterStats.Dirhams;
+		if (WeaponStorage)
+		{
+			AItemStorage* Weapons = GetWorld()->SpawnActor<AItemStorage>(WeaponStorage);
+			if (Weapons)
+			{
+				FString WeaponName = LoadGameInstance->CharacterStats.WeaponName;
+				if (Weapons->WeaponMap.Contains(WeaponName))
+				{
+					AWeaponBase* WeaponToEquip = GetWorld()->SpawnActor<AWeaponBase>(Weapons->WeaponMap[WeaponName]);
+					WeaponToEquip->Equip(this);
+				}
+
+			}
+		}
+
+		if (!Alive())
+		{
+			SetMovementStatus(EMovementStatus::EMS_Normal);
+			GetMesh()->bPauseAnims = false;
+			GetMesh()->bNoSkeletonUpdate = false;
+		}
+		
+
+		if (bSetPosition)
+		{
+			SetActorLocation(LoadGameInstance->CharacterStats.Location);
+			SetActorRotation(LoadGameInstance->CharacterStats.Rotation);
+		}
+	}
+
+	
+
+
+}
+
 void ACharacterBase::SetEquippedWeapon(AWeaponBase* WeaponToSet)
 {
 	if (EquippedWeapon)
@@ -644,15 +816,21 @@ void ACharacterBase::SetEquippedWeapon(AWeaponBase* WeaponToSet)
 void ACharacterBase::AttackEnd(FName AttackRecoverySection)
 {
 	bAttacking = false;
+	bIsComboStarted = false;
 	SetInterpToEnemy(false);
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && CombatMontage)
 	{
 		AnimInstance->Montage_Play(CombatMontage, 1.35f);
 		AnimInstance->Montage_JumpToSection(AttackRecoverySection, CombatMontage);
-		GetWorld()->GetTimerManager().PauseTimer(ComboTimerHandle);
+		//GetWorld()->GetTimerManager().ClearTimer(ComboTimerHandle);
+		//GetWorldTimerManager().PauseTimer(ComboTimerHandle);
 
 	}
 
 }
+
+
+//Use this instead of casting
+ACharacterBase* ACharacterBase::SetPlayerRef_Implementation() { return this; }
 

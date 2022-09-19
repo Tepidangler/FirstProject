@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "particles/ParticleSystemComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "EnemyBase.h"
 
 AWeaponBase::AWeaponBase()
@@ -124,7 +125,7 @@ void AWeaponBase::Equip(ACharacterBase* Char)
 		SetInstigator(Char->GetController());
 		SkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 		SkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-
+		CollisionVolume->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SkeletalMesh->SetSimulatePhysics(false);
 		
 		const USkeletalMeshSocket* RightHandSocket = Char->GetMesh()->GetSocketByName("weapon_rSocket");
@@ -143,6 +144,7 @@ void AWeaponBase::Equip(ACharacterBase* Char)
 		{
 			IdleParticlesComponent->Deactivate();
 		}
+		
 	}
 
 }
