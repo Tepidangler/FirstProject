@@ -30,6 +30,9 @@ void UEnemyAnimInstance::UpdateAnimationProperties(float DeltaTime)
 
 		}
 	}
+
+
+
 	if (Pawn)
 	{
 		UWorld* World = GetWorld();

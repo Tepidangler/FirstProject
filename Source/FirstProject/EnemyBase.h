@@ -56,9 +56,13 @@ public: //Variables
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundCue* EffortSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundCue* DeathSound;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class AAIController* AIController;
+
+	static AAIController* StaticAIController;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI")
 	bool bOverlappingCombatSphere;
@@ -69,11 +73,21 @@ public: //Variables
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	class UAnimMontage* CombatMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UAnimMontage* IdleMontage;
+
 	FTimerHandle AttackTimer;
 
 	FTimerHandle DeathTimer;
 
 	FHitResult CastHit;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float InterpSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	float DistanceToTarget;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	FVector Direction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float DeathDelay;
@@ -121,16 +135,21 @@ public: //Variables
 	bool bUltimateAttack;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bCharging;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bIsChargingIdle;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bInterpToPlayer;
+
+	static bool bIsUltimateAttack;
 
 	//Particles emitted when weapon fired
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particles")
 	UParticleSystem* WeaponFireParticles;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particles")
+	UParticleSystem* WeaponUltimateFireParticles;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	TSubclassOf<UDamageType> DamageTypeClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | Projectile")
-	FVector MuzzleOffset;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat | Projectile")
 	TSubclassOf<class AProjectileBase> ProjectileClass;
@@ -187,8 +206,7 @@ public:
 		void ActivateCollision();
 	UFUNCTION(BlueprintCallable)
 		void DeactivateCollision();
-	UFUNCTION(BlueprintCallable)
-	void PlaySwingSound();
+
 
 	UFUNCTION(BlueprintCallable)
 	void LeftCombatAboutToCollide();
@@ -206,10 +224,22 @@ public:
 	void Attack();
 
 	UFUNCTION(BlueprintCallable)
+	void Fire();
+
+	UFUNCTION(BlueprintCallable)
+	void UltimateFire();
+
+	UFUNCTION(BlueprintCallable)
 	void SpawnMuzzleFlashParticles();
 
 	UFUNCTION(BlueprintCallable)
+	void PlaySwingSound();
+
+	UFUNCTION(BlueprintCallable)
 	void PlayEffortSound();
+
+	UFUNCTION(BlueprintCallable)
+	void PlayDeathSound();
 
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
@@ -221,7 +251,14 @@ public:
 	bool IsCharacterInView();
 
 	UFUNCTION(BlueprintCallable)
+	void SetbIsChargingIdle();
+
+	UFUNCTION(BlueprintCallable)
 	void MoveToTarget(class ACharacterBase* Target);
+
+	FRotator GetMuzzleRotationYaw(FVector Target, FName SocketName);
+
+	void SetInterpToPlayer(bool Interp);
 
 	AEnemyBase* SetEnemyRef_Implementation() override;
 
@@ -230,11 +267,13 @@ public:
 	void Die(AActor* Causer);
 
 	UFUNCTION(BlueprintCallable)
-		void DeathEnd();
+	void DeathEnd();
 
 	void Disappear();
 
 	bool Alive();
+
+	//static bool IsUltimateAttack();
 
 
 
