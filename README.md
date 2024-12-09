@@ -1,0 +1,1 @@
+Just a simple Action-Platformer esque game I made for my children, I'm currently working on making the .pak file smaller so I can build an installer using the WiXToolset, so this repo's true purpose is simply to house the source code
