@@ -73,7 +73,7 @@ void EmptyLinkFunctionForGeneratedCodeMainCharacter() {}
 		}
 		return OuterClass;
 	}
-	IMPLEMENT_CLASS(AMainCharacter, 1543097187);
+	IMPLEMENT_CLASS(AMainCharacter, 1521330259);
 	template<> FIRSTPROJECT_API UClass* StaticClass<AMainCharacter>()
 	{
 		return AMainCharacter::StaticClass();

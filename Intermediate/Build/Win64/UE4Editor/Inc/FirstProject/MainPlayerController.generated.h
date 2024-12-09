@@ -14,8 +14,70 @@ PRAGMA_DISABLE_DEPRECATION_WARNINGS
 #define FIRSTPROJECT_MainPlayerController_generated_h
 
 #define FirstProject_Source_FirstProject_MainPlayerController_h_17_SPARSE_DATA
-#define FirstProject_Source_FirstProject_MainPlayerController_h_17_RPC_WRAPPERS
-#define FirstProject_Source_FirstProject_MainPlayerController_h_17_RPC_WRAPPERS_NO_PURE_DECLS
+#define FirstProject_Source_FirstProject_MainPlayerController_h_17_RPC_WRAPPERS \
+	virtual void RemovePauseMenu_Implementation(); \
+	virtual void DisplayPauseMenu_Implementation(); \
+	virtual void RemoveOptionsMenu_Implementation(); \
+	virtual void DisplayOptionsMenu_Implementation(); \
+	virtual void RemoveLoadGameScreen_Implementation(); \
+	virtual void DisplayLoadGameScreen_Implementation(); \
+	virtual void RemoveDeathOverlay_Implementation(); \
+	virtual void DisplayDeathOverlay_Implementation(); \
+	virtual void RemoveMainMenu_Implementation(); \
+	virtual void DisplayMainMenu_Implementation(); \
+	virtual void RemoveLoadingScreen_Implementation(); \
+	virtual void DisplayLoadingScreen_Implementation(); \
+ \
+	DECLARE_FUNCTION(execToggleMainMenu); \
+	DECLARE_FUNCTION(execRemovePauseMenu); \
+	DECLARE_FUNCTION(execDisplayPauseMenu); \
+	DECLARE_FUNCTION(execRemoveOptionsMenu); \
+	DECLARE_FUNCTION(execDisplayOptionsMenu); \
+	DECLARE_FUNCTION(execRemoveLoadGameScreen); \
+	DECLARE_FUNCTION(execDisplayLoadGameScreen); \
+	DECLARE_FUNCTION(execRemoveDeathOverlay); \
+	DECLARE_FUNCTION(execDisplayDeathOverlay); \
+	DECLARE_FUNCTION(execRemoveMainMenu); \
+	DECLARE_FUNCTION(execDisplayMainMenu); \
+	DECLARE_FUNCTION(execRemoveLoadingScreen); \
+	DECLARE_FUNCTION(execDisplayLoadingScreen); \
+	DECLARE_FUNCTION(execRemoveHUDOverlay); \
+	DECLARE_FUNCTION(execDisplayHUDOverlay);
+
+
+#define FirstProject_Source_FirstProject_MainPlayerController_h_17_RPC_WRAPPERS_NO_PURE_DECLS \
+	virtual void RemovePauseMenu_Implementation(); \
+	virtual void DisplayPauseMenu_Implementation(); \
+	virtual void RemoveOptionsMenu_Implementation(); \
+	virtual void DisplayOptionsMenu_Implementation(); \
+	virtual void RemoveLoadGameScreen_Implementation(); \
+	virtual void DisplayLoadGameScreen_Implementation(); \
+	virtual void RemoveDeathOverlay_Implementation(); \
+	virtual void DisplayDeathOverlay_Implementation(); \
+	virtual void RemoveMainMenu_Implementation(); \
+	virtual void DisplayMainMenu_Implementation(); \
+	virtual void RemoveLoadingScreen_Implementation(); \
+	virtual void DisplayLoadingScreen_Implementation(); \
+ \
+	DECLARE_FUNCTION(execToggleMainMenu); \
+	DECLARE_FUNCTION(execRemovePauseMenu); \
+	DECLARE_FUNCTION(execDisplayPauseMenu); \
+	DECLARE_FUNCTION(execRemoveOptionsMenu); \
+	DECLARE_FUNCTION(execDisplayOptionsMenu); \
+	DECLARE_FUNCTION(execRemoveLoadGameScreen); \
+	DECLARE_FUNCTION(execDisplayLoadGameScreen); \
+	DECLARE_FUNCTION(execRemoveDeathOverlay); \
+	DECLARE_FUNCTION(execDisplayDeathOverlay); \
+	DECLARE_FUNCTION(execRemoveMainMenu); \
+	DECLARE_FUNCTION(execDisplayMainMenu); \
+	DECLARE_FUNCTION(execRemoveLoadingScreen); \
+	DECLARE_FUNCTION(execDisplayLoadingScreen); \
+	DECLARE_FUNCTION(execRemoveHUDOverlay); \
+	DECLARE_FUNCTION(execDisplayHUDOverlay);
+
+
+#define FirstProject_Source_FirstProject_MainPlayerController_h_17_EVENT_PARMS
+#define FirstProject_Source_FirstProject_MainPlayerController_h_17_CALLBACK_WRAPPERS
 #define FirstProject_Source_FirstProject_MainPlayerController_h_17_INCLASS_NO_PURE_DECLS \
 private: \
 	static void StaticRegisterNativesAMainPlayerController(); \
@@ -61,13 +123,17 @@ public: \
 
 
 #define FirstProject_Source_FirstProject_MainPlayerController_h_17_PRIVATE_PROPERTY_OFFSET
-#define FirstProject_Source_FirstProject_MainPlayerController_h_14_PROLOG
+#define FirstProject_Source_FirstProject_MainPlayerController_h_14_PROLOG \
+	FirstProject_Source_FirstProject_MainPlayerController_h_17_EVENT_PARMS
+
+
 #define FirstProject_Source_FirstProject_MainPlayerController_h_17_GENERATED_BODY_LEGACY \
 PRAGMA_DISABLE_DEPRECATION_WARNINGS \
 public: \
 	FirstProject_Source_FirstProject_MainPlayerController_h_17_PRIVATE_PROPERTY_OFFSET \
 	FirstProject_Source_FirstProject_MainPlayerController_h_17_SPARSE_DATA \
 	FirstProject_Source_FirstProject_MainPlayerController_h_17_RPC_WRAPPERS \
+	FirstProject_Source_FirstProject_MainPlayerController_h_17_CALLBACK_WRAPPERS \
 	FirstProject_Source_FirstProject_MainPlayerController_h_17_INCLASS \
 	FirstProject_Source_FirstProject_MainPlayerController_h_17_STANDARD_CONSTRUCTORS \
 public: \
@@ -80,6 +146,7 @@ public: \
 	FirstProject_Source_FirstProject_MainPlayerController_h_17_PRIVATE_PROPERTY_OFFSET \
 	FirstProject_Source_FirstProject_MainPlayerController_h_17_SPARSE_DATA \
 	FirstProject_Source_FirstProject_MainPlayerController_h_17_RPC_WRAPPERS_NO_PURE_DECLS \
+	FirstProject_Source_FirstProject_MainPlayerController_h_17_CALLBACK_WRAPPERS \
 	FirstProject_Source_FirstProject_MainPlayerController_h_17_INCLASS_NO_PURE_DECLS \
 	FirstProject_Source_FirstProject_MainPlayerController_h_17_ENHANCED_CONSTRUCTORS \
 private: \

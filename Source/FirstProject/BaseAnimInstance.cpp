@@ -4,7 +4,11 @@
 #include "BaseAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CharacterBase.h"
+#include "MainPlayerController.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "WeaponBase.h"
 
 
 void UBaseAnimInstance::NativeInitializeAnimation()
@@ -14,8 +18,33 @@ void UBaseAnimInstance::NativeInitializeAnimation()
 	{
 		//Sets Pawn to PawnOwner if it can
 		Pawn = TryGetPawnOwner();
+
+
 	}
 
+	
+
+}
+
+void UBaseAnimInstance::NativeBeginPlay()
+{
+	if (Pawn == nullptr)
+	{
+		Pawn = TryGetPawnOwner();
+	}
+
+	if (Pawn)
+	{
+		MC = Cast<ACharacterBase>(Pawn);
+		if (MC)
+		{
+			if (MC->LevelStartMontage)
+			{
+				MC->DisableInput(MC->MainPlayerController);
+				Montage_Play(MC->LevelStartMontage);
+			}
+		}
+	}
 }
 
 void UBaseAnimInstance::UpdateAnimationProperties()
@@ -78,8 +107,80 @@ void UBaseAnimInstance::UpdateAnimationProperties()
 				}
 
 				bIsWeaponEquipped = MC->bIsWeaponEquipped;
+				bIsAttacking = MC->bAttacking;
+
+				if (bIsAttackingInAir)
+				{
+					MC->EquippedWeapon->ActivateCollision();
+				}
+
 			}
 			
 		}
+		if (Pawn)
+		{
+			MC = Cast<ACharacterBase>(Pawn);
+			if (MC)
+			{
+				if (MC->LevelStartMontage)
+				{
+					if (!Montage_IsPlaying(MC->LevelStartMontage))
+					{
+						MC->EnableInput(MC->MainPlayerController);
+					}
+				}
+			}
+		}
 	}
+}
+
+FName UBaseAnimInstance::GetNextAttackRecoverySection()
+{
+	FName AttackRecoverySectionName;
+
+	if (Pawn)
+	{ 
+		//MC = Cast<ACharacterBase>(Pawn);
+		FName CurrentMontageSection = Montage_GetCurrentSection();
+
+		if (CurrentMontageSection == "PrimaryAttack_1")
+		{
+			AttackRecoverySectionName = AttackRecoverySections[0];
+		}
+		if (CurrentMontageSection == "PrimaryAttack_B")
+		{
+			AttackRecoverySectionName = AttackRecoverySections[1];
+		}
+		if (CurrentMontageSection == "PrimaryAttack_C")
+		{
+			AttackRecoverySectionName = AttackRecoverySections[2];
+		}
+		if (CurrentMontageSection == "PrimaryAttack_D")
+		{
+			AttackRecoverySectionName = "None";
+		}
+		if (CurrentMontageSection == "PrimaryAttack_Air")
+		{
+			AttackRecoverySectionName = "None";
+		}
+	}
+	return AttackRecoverySectionName;
+}
+
+void UBaseAnimInstance::PlaySwingEffortSound()
+{
+	
+	if (Pawn)
+	{
+		MC = Cast<ACharacterBase>(Pawn);
+		if (MC)
+		{
+			if (MC->SwingSwordEffortSound)
+			{
+				UGameplayStatics::PlaySound2D(this, MC->SwingSwordEffortSound);
+			}
+		}
+
+	}
+
 }

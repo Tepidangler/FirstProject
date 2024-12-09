@@ -18,7 +18,8 @@ public:
 //Variables
 		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 		float Damage;
-
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+		TSubclassOf<UDamageType> DamageTypeClass;
 
 //Functions
 

@@ -25,13 +25,46 @@ public: //Variables
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
 	class AEnemyBase* Enemy;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float Pitch;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float Roll;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		float Yaw;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Movement)
+		float TargetRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		bool bIsAccelerating;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		bool bIsAttacking;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+		bool bIsFullBody;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
+		bool bIsInAir;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+		float YawDelta;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	FRotator RotationLastTick;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	float Direction;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	float StopDirection;
 
 
-public: //Functions
+public:
+	//Functions
 	virtual void NativeInitializeAnimation() override;
 
 	UFUNCTION(BlueprintCallable, Category = AnimationProperties)
-		void UpdateAnimationProperties();
+		void UpdateAnimationProperties(float DeltaTime);
 
 
 };

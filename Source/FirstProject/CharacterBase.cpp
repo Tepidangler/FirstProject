@@ -15,6 +15,11 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "EnemyBase.h"
 #include "MainPlayerController.h"
+#include "Blueprint/UserWidget.h"
+#include "FirstSaveGame.h"
+#include "FirstProjectGameInstance.h"
+#include "ItemStorage.h"
+#include "BaseAnimInstance.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -22,6 +27,8 @@ ACharacterBase::ACharacterBase()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	RootComponent = GetCapsuleComponent();
 	/** Create Camera Boom. Pulls Towards player if there's a collision */
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));
 	CameraBoom->SetupAttachment(GetRootComponent());
@@ -60,14 +67,23 @@ ACharacterBase::ACharacterBase()
 	//Setting Interpolation Speed
 	InterpSpeed = 15.f;
 
+	Health = 200.f;
+	MaxHealth = 200.f;
+	Stamina = 100.f;
+	MaxStamina = 100.f;
+
 	bMovingForward = false;
 	bMovingRight = false;
+	bSprinting = false;
 	bShiftKeyDown = false;
 	bActionDown = false;
 	bIsWeaponEquipped = false;
 	bIsInAir = false;
 	bInterpToEnemy = false;
 	bHasCombatTarget = false;
+	bIsComboStarted = false;
+	bESCDown = false;
+	bIsNewGame = true;
 
 	//Initialize Enums
 	MovementStatus = EMovementStatus::EMS_Normal;
@@ -80,24 +96,56 @@ void ACharacterBase::BeginPlay()
 	Super::BeginPlay();
 	//UKismetSystemLibrary::DrawDebugSphere(this, GetActorLocation() + FVector(0.f,0.f,175.f), 25.f, 8, FLinearColor::Green, 10.f, .5f);
 	
-	MainPlayerController = Cast<AMainPlayerController>(GetController());
+	MainPlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+
+	EnableInput(MainPlayerController);
+	UFirstProjectGameInstance* GameInstance = Cast<UFirstProjectGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	check(GameInstance);
+	if (!GameInstance->bContinuing)
+	{
+		if (GameInstance->CurrentSaveGame && !GameInstance->bIsMovingToInteriorMap)
+		{
+			GameInstance->LoadGameNoSwitch(true, GameInstance->CurrentSaveGame->SlotName);
+			return;
+		}
+
+		if (GameInstance->CurrentSaveGame && GameInstance->bIsMovingToInteriorMap)
+		{
+			GameInstance->bIsMovingToInteriorMap = false;
+			GameInstance->LoadGameNoSwitch(false, GameInstance->CurrentSaveGame->SlotName);
+
+		}
+	}
+
+
+	
+	
+
 }
 
 // Called every frame
 void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+	if (GetActorLocation().Z <= GetWorld()->GetWorldSettings()->KillZ)
+	{
+		Die();
+	}
 
 	//bIsInAir = this->GetCharacterMovement()->IsFalling();
 	//Caluclating how much will drain this frame with delta time
 	if (Alive() == false) return;
-
 	float DeltaStamina = StaminaDrainRate * DeltaTime;
+
+	if (bSprinting && GetCharacterMovement()->GetCurrentAcceleration().Size() <= 0)
+	{
+		bSprinting = false;
+	}
+
 	switch (StaminaStatus)
 	{
 	case EStaminaStatus::ESS_Normal:
-		if (bShiftKeyDown)
+		if (bSprinting)
 		{
 			if (bMovingForward || bMovingRight)
 			{
@@ -119,7 +167,7 @@ void ACharacterBase::Tick(float DeltaTime)
 					SetMovementStatus(EMovementStatus::EMS_Normal);
 				}
 			}
-			else // Shift Key Up 
+			else 
 			{
 				if (Stamina + DeltaStamina >= MaxStamina)
 				{
@@ -133,7 +181,7 @@ void ACharacterBase::Tick(float DeltaTime)
 			}
 			
 		}
-		else // Shift Key Up 
+		else // Not Sprinting
 		{
 			if (Stamina + DeltaStamina >= MaxStamina)
 			{
@@ -147,7 +195,7 @@ void ACharacterBase::Tick(float DeltaTime)
 		}
 		break;
 	case EStaminaStatus::ESS_Fatigued:
-		if (bShiftKeyDown)
+		if (bSprinting)
 		{
 			if (bMovingForward || bMovingRight)
 			{
@@ -185,7 +233,7 @@ void ACharacterBase::Tick(float DeltaTime)
 			}
 			
 		}
-		else //Shift Key Up
+		else //Not Sprinting
 		{
 			if (Stamina + DeltaStamina >= MinSprintStamina)
 			{
@@ -200,19 +248,21 @@ void ACharacterBase::Tick(float DeltaTime)
 		}
 		break;
 	case EStaminaStatus::ESS_Exhausted:
-		if (bShiftKeyDown)
+		if (bSprinting)
 		{
 			if (bMovingForward || bMovingRight)
 			{
 				Stamina = 0.f;
+				bSprinting = false;
 			}
-			else //Moving Right/Left OR Forward/Backward
+			else // NOT Moving Right/Left OR Forward/Backward
 			{
 				SetStaminaStatus(EStaminaStatus::ESS_ExhaustedRecovering);
 				Stamina += DeltaStamina;
+				bSprinting = false;
 			}
 		}
-		else //Shift Key Up
+		if(!bSprinting) //Shift Key Up
 		{
 			SetStaminaStatus(EStaminaStatus::ESS_ExhaustedRecovering);
 			Stamina += DeltaStamina;
@@ -294,6 +344,11 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacterBase::LMBDown);
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &ACharacterBase::LMBUp);
+
+
+
+	PlayerInputComponent->BindAction("OpenPauseMenu", IE_Pressed, this, &ACharacterBase::ESCDown);
+	PlayerInputComponent->BindAction("OpenPauseMenu", IE_Released, this, &ACharacterBase::ESCUp);
 	
 }
 
@@ -313,6 +368,9 @@ void ACharacterBase::MoveForward(float Value)
 		bUseControllerRotationYaw = true; // While Character is moving allow Camera to use Yaw Rotation
 		AddMovementInput(Direction, Value);
 		bMovingForward = true;
+
+		UE_LOG(LogTemp, Warning, TEXT("Forward Vector:  %f"), FVector::DotProduct(GetVelocity(), GetActorForwardVector()));
+			UE_LOG(LogTemp, Warning, TEXT("Right Vector:  %f"), FVector::DotProduct(GetVelocity(), GetActorRightVector()));
 
 	}
 	else
@@ -338,6 +396,9 @@ void ACharacterBase::MoveRight(float Value)
 		
 		AddMovementInput(Direction, Value);
 		bMovingRight = true;
+
+		UE_LOG(LogTemp, Warning, TEXT("Forward Vector:  %f"), FVector::DotProduct(GetVelocity(), GetActorForwardVector()));
+		UE_LOG(LogTemp, Warning, TEXT("Right Vector:  %f"), FVector::DotProduct(GetVelocity(), GetActorRightVector()));
 
 	}
 
@@ -376,6 +437,10 @@ void ACharacterBase::DecrementHealth(float Amount)
 
 float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (GetActorLocation().Z <= GetWorld()->GetWorldSettings()->KillZ)
+	{
+		Die();
+	}
 	if (Health - DamageAmount <= 0.f)
 	{
 		Health = 0.f;
@@ -399,23 +464,29 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 
 void ACharacterBase::Die()
 {
-
+	DisableInput(MainPlayerController);
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && CombatMontage && Alive())
 	{
+		AnimInstance->Montage_Stop(1.f, CombatMontage);
 		AnimInstance->Montage_Play(CombatMontage, 1.f);
 		AnimInstance->Montage_JumpToSection(FName("Death"));
-		//AnimInstance->Montage_Stop(1.f, CombatMontage);
 		GetWorld()->GetTimerManager().PauseTimer(ComboTimerHandle);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	SetMovementStatus(EMovementStatus::EMS_Dead);
+	MainPlayerController->ToggleDeathOverlay();
+
 }
 
 void ACharacterBase::DeathEnd()
 {
 	GetMesh()->bPauseAnims = true;
 	GetMesh()->bNoSkeletonUpdate = true;
+
+	check(MainPlayerController);
+
+
 }
 
 
@@ -449,6 +520,7 @@ void ACharacterBase::SetMovementStatus(EMovementStatus Status)
 void ACharacterBase::ShiftKeyDown()
 {
 	bShiftKeyDown = true;
+	bSprinting = true;
 }
 
 void ACharacterBase::ShiftKeyUp()
@@ -480,7 +552,13 @@ void ACharacterBase::ActionUp()
 
 void ACharacterBase::LMBDown()
 {
-	if (Alive() == false) return;
+	if (!Alive()) return;
+
+	if (bIsComboStarted)
+	{
+		bAttacking = true;
+		return;
+	}
 
 	if (!bAttacking)
 	{
@@ -514,61 +592,72 @@ void ACharacterBase::Attack()
 		bAttacking = true;
 		SetInterpToEnemy(true);
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance && CombatMontage)
+		UBaseAnimInstance* BaseAnimInstance = Cast<UBaseAnimInstance>(AnimInstance);
+		check(BaseAnimInstance);
+		check(AnimInstance);
+		check(CombatMontage)
+		if (bIsComboStarted == false && !BaseAnimInstance->bIsInAir)
 		{
-			if (GetWorld()->GetTimerManager().IsTimerActive(ComboTimerHandle) == false)
+			int32 Section = FMath::RandRange(0, 3);
+			switch (Section)
 			{
-				int32 Section = FMath::RandRange(0, 3);
-				switch (Section)
-				{
-				case 0:
-					AnimInstance->Montage_Play(CombatMontage, 1.35f);
-					AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_1"), CombatMontage);
-					GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, 1.5f, true, 1.5f);
-					break;
+			case 0:
+				AnimInstance->Montage_Play(CombatMontage, 1.35f);
+				AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_1"), CombatMontage);
+				bIsComboStarted = true;
+				bAttacking = false;
+				break;
+			case 1:
+				AnimInstance->Montage_Play(CombatMontage, 1.35f);
+				AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_B"), CombatMontage);
+				bIsComboStarted = true;
+				bAttacking = false;
+				break;
+				
+			case 2:
+				AnimInstance->Montage_Play(CombatMontage, 1.35f);
+				AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_C"), CombatMontage);
+				bIsComboStarted = true;
+				bAttacking = false;
+				break;
+			case 3:
+				AnimInstance->Montage_Play(CombatMontage, 1.35f);
+				AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_D"), CombatMontage);
+				bIsComboStarted = true;
+				bAttacking = false;
+				break;
 
-				case 1:
-					AnimInstance->Montage_Play(CombatMontage, 1.35f);
-					AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_B"), CombatMontage);
-					GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, 1.5f, true, 1.5f);
-					break;
+			default:
 
-				case 2:
-					AnimInstance->Montage_Play(CombatMontage, 1.35f);
-					AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_C"), CombatMontage);
-					GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, 1.5f, true, 1.5f);
-					break;
-				case 3:
-					AnimInstance->Montage_Play(CombatMontage, 1.35f);
-					AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_D"), CombatMontage);
-					GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, 1.5f, true, 1.5f);
-					break;
+				break;
 
-				default:
-
-					break;
-
-				}
+			}
 				/**
 				AnimInstance->Montage_Play(CombatMontage, 1.35f);
 				AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_1"), CombatMontage);
 				GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, 1.5f, true, 1.5f);
 				*/
-				if (AnimInstance && CombatMontage && this->GetCharacterMovement()->IsFalling())
-				{
-					AnimInstance->Montage_Play(CombatMontage, 1.35f);
-					AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_Air"), CombatMontage);
-					AnimInstance->Montage_Stop(1.f, CombatMontage);
-				}
+
+			if (BaseAnimInstance->bIsInAir)
+			{
+				BaseAnimInstance->bIsAttackingInAir = true;
+				AnimInstance->Montage_Play(AirCombatMontage, 1.35f);
+				AnimInstance->Montage_JumpToSection(FName("PrimaryAttack_Air"), AirCombatMontage);
 			}
-	}
+			if (SwingSwordEffortSound)
+			{
+				UGameplayStatics::PlaySound2D(this, SwingSwordEffortSound);
+			}
+			
+
+		}
 	
 		/**
 		if (EquippedWeapon->SwingSound)
 		{
 			UGameplayStatics::PlaySound2D(this, EquippedWeapon->SwingSound);
 		}
-		/**
+		
 		if (!bAttacking)
 		{
 			AttackEnd(FName("PrimaryAttack_Recover"));
@@ -578,6 +667,22 @@ void ACharacterBase::Attack()
 	}
 	
 }
+
+void ACharacterBase::ESCDown()
+{
+	bESCDown = true;
+	if (MainPlayerController)
+	{
+		MainPlayerController->TogglePauseMenu();
+	}
+}
+
+void ACharacterBase::ESCUp()
+{
+	bESCDown = false;
+}
+
+
 
 void ACharacterBase::SetInterpToEnemy(bool Interp)
 {
@@ -629,6 +734,71 @@ void ACharacterBase::PlaySwingSound()
 	
 }
 
+void ACharacterBase::UpdateCombatTarget()
+{
+	TArray<AActor*> OverlappingActors;
+	GetOverlappingActors(OverlappingActors,EnemyFilter);
+
+	if (OverlappingActors.Num() == 0)
+	{
+		if (MainPlayerController)
+		{
+			MainPlayerController->RemoveEnemyHealthBar();
+		}
+		return;
+	}
+
+	AEnemyBase* ClosestEnemy = Cast<AEnemyBase>(OverlappingActors[0]);
+	if (ClosestEnemy)
+	{
+		FVector CharLocation = GetActorLocation();
+		float MinDistance = (ClosestEnemy->GetActorLocation() - GetActorLocation()).Size();
+		float Distance;
+
+		for (auto Actor : OverlappingActors)
+		{
+			AEnemyBase* Enemy = Cast<AEnemyBase>(Actor);
+			if (Enemy)
+			{
+				Distance = (Enemy->GetActorLocation() - GetActorLocation()).Size();
+				if (Distance < MinDistance)
+				{
+					MinDistance = Distance;
+					ClosestEnemy = Enemy;
+				}
+			}
+		}
+		if (MainPlayerController)
+		{
+			MainPlayerController->DisplayEnemyHealthBar();
+		}
+		SetCombatTarget(ClosestEnemy);
+		bHasCombatTarget = true;
+	}
+	
+
+
+
+}
+
+void ACharacterBase::SwitchLevel(FName LevelName)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FString CurrentLevel = World->GetMapName();
+
+		FName CurrentLevelName(*CurrentLevel);
+		if (CurrentLevelName != LevelName)
+		{
+			UGameplayStatics::OpenLevel(World, LevelName);
+		}
+	}
+
+}
+
+
+
 void ACharacterBase::SetEquippedWeapon(AWeaponBase* WeaponToSet)
 {
 	if (EquippedWeapon)
@@ -644,15 +814,31 @@ void ACharacterBase::SetEquippedWeapon(AWeaponBase* WeaponToSet)
 void ACharacterBase::AttackEnd(FName AttackRecoverySection)
 {
 	bAttacking = false;
+	bIsComboStarted = false;
 	SetInterpToEnemy(false);
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	UBaseAnimInstance* BaseAnimInstance = Cast<UBaseAnimInstance>(AnimInstance);
+	check(BaseAnimInstance);
+	BaseAnimInstance->bIsAttackingInAir = false;
+	if (!BaseAnimInstance->bIsAttackingInAir)
+	{
+		EquippedWeapon->DeactivateCollision();
+	}
+	if (AttackRecoverySection == "None")
+	{
+		return;
+	}
 	if (AnimInstance && CombatMontage)
 	{
 		AnimInstance->Montage_Play(CombatMontage, 1.35f);
 		AnimInstance->Montage_JumpToSection(AttackRecoverySection, CombatMontage);
-		GetWorld()->GetTimerManager().PauseTimer(ComboTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(ComboTimerHandle);
+		GetWorldTimerManager().PauseTimer(ComboTimerHandle);
 
 	}
 
 }
+
+//Use this instead of casting
+ACharacterBase* ACharacterBase::SetPlayerRef_Implementation() { return this; }
 

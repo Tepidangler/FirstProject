@@ -16,11 +16,15 @@ PRAGMA_DISABLE_DEPRECATION_WARNINGS
 #define FirstProject_Source_FirstProject_BaseAnimInstance_h_15_SPARSE_DATA
 #define FirstProject_Source_FirstProject_BaseAnimInstance_h_15_RPC_WRAPPERS \
  \
+	DECLARE_FUNCTION(execPlaySwingEffortSound); \
+	DECLARE_FUNCTION(execGetNextAttackRecoverySection); \
 	DECLARE_FUNCTION(execUpdateAnimationProperties);
 
 
 #define FirstProject_Source_FirstProject_BaseAnimInstance_h_15_RPC_WRAPPERS_NO_PURE_DECLS \
  \
+	DECLARE_FUNCTION(execPlaySwingEffortSound); \
+	DECLARE_FUNCTION(execGetNextAttackRecoverySection); \
 	DECLARE_FUNCTION(execUpdateAnimationProperties);
 
 

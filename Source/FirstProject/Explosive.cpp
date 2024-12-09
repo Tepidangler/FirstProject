@@ -2,11 +2,12 @@
 
 
 #include "Explosive.h"
-#include "MainCharacter.h"
+#include "CharacterBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
-
+#include "EnemyBase.h"
+#include "FirstInterface.h"
 
 AExplosive::AExplosive()
 {
@@ -21,9 +22,13 @@ void AExplosive::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 
 	if (OtherActor)
 	{
-		AMainCharacter* MC = Cast<AMainCharacter>(OtherActor);
-		if (MC)
+		//ACharacterBase* MC = Cast<ACharacterBase>(OtherActor);
+		ACharacterBase* MC = IFirstInterface::Execute_SetPlayerRef(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+		AEnemyBase* Enemy = IFirstInterface::Execute_SetEnemyRef(OtherActor);
+		FString OAName = OtherActor->GetName();
+		if (MC || Enemy)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Other Actor: %s"), *OAName)
 			UWorld* World = GetWorld();
 			if (OverlapParticles)
 			{
@@ -34,7 +39,7 @@ void AExplosive::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 				UGameplayStatics::PlaySound2D(this, OverlapSound);
 			}
 
-			MC->DecrementHealth(Damage);
+			UGameplayStatics::ApplyDamage(OtherActor, Damage, nullptr, this, DamageTypeClass);
 			Destroy();
 		}
 	}

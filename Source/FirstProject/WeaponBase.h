@@ -35,6 +35,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item | Particle")
 	bool bWeaponParticles;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "SkeletalMesh")
 	class USkeletalMeshComponent* SkeletalMesh;
 
@@ -56,6 +57,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item | Combat")
 	AController* WeaponInstigator;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Save Data")
+	FString WeaponName;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item | Combat")
+	class ACharacterBase* Character;
 
 	//Functions
 

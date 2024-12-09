@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "FirstInterface.h"
 #include "CharacterBase.generated.h"
 
 UENUM(BlueprintType)
@@ -27,10 +28,20 @@ enum class EStaminaStatus : uint8
 	ESS_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
+UENUM(BlueprintType)
+enum class ECombatStatus : uint8
+{
+	ECS_Normal UMETA(DisplayName = "Normal"),
+	ECS_InCombat UMETA(DisplayName = "InCombat"),
+
+	ECS_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
 UCLASS()
-class FIRSTPROJECT_API ACharacterBase : public ACharacter
+class FIRSTPROJECT_API ACharacterBase : public ACharacter, public IFirstInterface
 {
 	GENERATED_BODY()
+
 
 public:
 	// Sets default values for this character's properties
@@ -45,7 +56,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Category = "Combat")
 	FVector CombatTargetLocation;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
 	class AWeaponBase* EquippedWeapon;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
@@ -67,6 +78,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enums")
 	EStaminaStatus StaminaStatus;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enums")
+	ECombatStatus CombatStatus;
+
 	/** Camera boom positioning the camera behind the player */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -76,6 +90,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
 	class UAnimMontage* CombatMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
+	UAnimMontage* LevelStartMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
+	UAnimMontage* AirCombatMontage;
 
 	/** Base turn rates to scale turning functions for the camera*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -94,6 +113,8 @@ public:
 
 	bool bActionDown;
 
+	bool bESCDown;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category ="Movement")
 	float StaminaDrainRate;
 
@@ -109,11 +130,25 @@ public:
 
 	FTimerHandle ComboTimerHandle;
 
+	bool bIsComboStarted;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+	bool bIsNewGame;
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Particles")
 	class UParticleSystem* HitParticles;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	class USoundCue* HitSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundCue* SwingSwordEffortSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TSubclassOf<AEnemyBase> EnemyFilter;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Save Data")
+	TSubclassOf<class AItemStorage> WeaponStorage;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -130,6 +165,8 @@ public:
 	void MoveRight(float Value);
 
 	bool bMovingRight;
+
+	bool bSprinting;
 	/** Called via input to turn at a given rate
 	* @param Rate This is a normalized rate, ie 1.0 means 100% of desired turn rate
 	*/
@@ -156,6 +193,7 @@ public:
 	void SetMovementStatus(EMovementStatus Status);
 
 	FORCEINLINE EMovementStatus GetMovementStatus() { return MovementStatus; }
+	FORCEINLINE ECombatStatus GetCombatStatus() { return CombatStatus; }
 
 	//Press Shift Key to Start Sprinting
 	void ShiftKeyDown();
@@ -178,6 +216,10 @@ public:
 	//Function for attacking
 	void Attack();
 
+	void ESCDown();
+
+	void ESCUp();
+
 	void SetInterpToEnemy(bool Interp);
 
 	bool Alive();
@@ -195,7 +237,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PlaySwingSound();
 
+	UFUNCTION()
+	void UpdateCombatTarget();
+
+	UFUNCTION(BlueprintCallable)
+	void SwitchLevel(FName LevelName);
+
+	ACharacterBase* SetPlayerRef_Implementation() override;
+
 	FORCEINLINE void SetStaminaStatus(EStaminaStatus Status) { StaminaStatus = Status; }
+
+	FORCEINLINE void SetCombatStatus(ECombatStatus Status) { CombatStatus = Status; }
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
