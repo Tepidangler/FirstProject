@@ -9,6 +9,7 @@
 /**
  * 
  */
+
 UCLASS()
 class FIRSTPROJECT_API UBaseAnimInstance : public UAnimInstance
 {
@@ -23,6 +24,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
 	bool bIsInAir;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
+	bool bIsAttackingInAir;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 	float YawDelta;
@@ -79,6 +83,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Sounds")
 	void PlaySwingEffortSound();
+
+	
 
 
 

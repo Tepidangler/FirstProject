@@ -23,6 +23,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
 	FName TransitionLevelName;
 
+	FTimerHandle LoadingHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	class UParticleSystemComponent* LevelTransitionParticlesComponent;
+
+	static bool bIsVisible;
+
+	float LoadDelay;
+
+	FTimerHandle LoadTimer;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -37,4 +48,9 @@ public:
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION()
+	void RemoveLoadingScreen();
+
+
+	static void SetIsVisible(bool Visibility);
 };

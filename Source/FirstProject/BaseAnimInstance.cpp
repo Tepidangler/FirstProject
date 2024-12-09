@@ -4,9 +4,11 @@
 #include "BaseAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CharacterBase.h"
+#include "MainPlayerController.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "WeaponBase.h"
 
 
 void UBaseAnimInstance::NativeInitializeAnimation()
@@ -38,6 +40,7 @@ void UBaseAnimInstance::NativeBeginPlay()
 		{
 			if (MC->LevelStartMontage)
 			{
+				MC->DisableInput(MC->MainPlayerController);
 				Montage_Play(MC->LevelStartMontage);
 			}
 		}
@@ -104,6 +107,13 @@ void UBaseAnimInstance::UpdateAnimationProperties()
 				}
 
 				bIsWeaponEquipped = MC->bIsWeaponEquipped;
+				bIsAttacking = MC->bAttacking;
+
+				if (bIsAttackingInAir)
+				{
+					MC->EquippedWeapon->ActivateCollision();
+				}
+
 			}
 			
 		}
@@ -116,7 +126,7 @@ void UBaseAnimInstance::UpdateAnimationProperties()
 				{
 					if (!Montage_IsPlaying(MC->LevelStartMontage))
 					{
-						MC->SetAllowMovementStatus(true);
+						MC->EnableInput(MC->MainPlayerController);
 					}
 				}
 			}
@@ -159,6 +169,7 @@ FName UBaseAnimInstance::GetNextAttackRecoverySection()
 
 void UBaseAnimInstance::PlaySwingEffortSound()
 {
+	
 	if (Pawn)
 	{
 		MC = Cast<ACharacterBase>(Pawn);

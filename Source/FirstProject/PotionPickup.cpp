@@ -16,7 +16,8 @@ void APotionPickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 
 	if (OtherActor)
 	{
-		
+		ACharacterBase* MC = Cast<ACharacterBase>(OtherActor);
+		if (MC)
 		{
 			if (OverlapParticles)
 			{

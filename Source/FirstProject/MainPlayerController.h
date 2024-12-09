@@ -57,41 +57,44 @@ public:
 	TSubclassOf<UUserWidget> WOptionsMenu;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UUserWidget* OptionsMenu;
-
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<UUserWidget> WSaveGameMenu;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widgets")
+	UUserWidget* SaveGameMenu;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	TSubclassOf<UUserWidget> WDeathOverlay;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UUserWidget* DeathOverlay;
 
-	bool bHUDOverlayVisible;
+	bool bHUDOverlayVisible = false;
 		
-	bool bEnemyHealthBarVisible;
+	bool bEnemyHealthBarVisible = false;
 
-	bool bPauseMenuVisible;
+	bool bPauseMenuVisible = false;
 	
-	bool bMainMenuVisible;
+	bool bMainMenuVisible = false;
 
-	bool bLoadGameScreenVisible;
+	bool bLoadGameScreenVisible = false;
 
-	bool bDeathOverlayVisible;
+	bool bDeathOverlayVisible = false;
 
-	bool bLoadingScreenVisible;
+	bool bLoadingScreenVisible = false;
 	
-	bool bOptionsMenuVisible;
+	bool bOptionsMenuVisible = false;
 
-	bool bIsLevelLoaded;
+	bool bSaveGameMenuVisible = false;
+
+	bool bIsLevelLoaded = false;
 
 	FVector EnemyLocation;
-
-	
 
 protected:
 
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
+	virtual void SetupInputComponent() override;
 
 public:
 
@@ -101,6 +104,7 @@ public:
 	void RemoveHUDOverlay();
 	void DisplayEnemyHealthBar();
 	void RemoveEnemyHealthBar();
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void DisplayLoadingScreen();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
@@ -130,15 +134,39 @@ public:
 	void DisplayPauseMenu();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void RemovePauseMenu();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
+	void DisplaySaveGameMenu();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
+	void RemoveSaveGameMenu();
 
+	UFUNCTION()
 	void TogglePauseMenu();
 	
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ToggleMainMenu();
-
+	UFUNCTION()
 	void ToggleLoadGameScreen();
-
+	UFUNCTION()
 	void ToggleOptionsMenu();
-
+	UFUNCTION()
 	void ToggleDeathOverlay();
+	UFUNCTION()
+	void ToggleLoadingScreen();
+	UFUNCTION()
+	void ToggleSaveGameMenu();
+
+	UFUNCTION()
+	void OnLoadGameClicked();
+	UFUNCTION()
+	void OnSaveGameClicked();
+
+	UFUNCTION()
+	void OnContinueClicked();
+	
+	UFUNCTION()
+	void OnExitClicked();
+
+
+	void CancelDown();
+	void CancelUp();
 };

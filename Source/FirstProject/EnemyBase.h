@@ -80,6 +80,8 @@ public: //Variables
 
 	FTimerHandle DeathTimer;
 
+	FTimerHandle InterpTimer;
+
 	FHitResult CastHit;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
@@ -96,6 +98,9 @@ public: //Variables
 	float AttackMinTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float AttackMaxTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float InterpTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	float Health;
@@ -124,6 +129,18 @@ public: //Variables
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	bool bIsBossEnemy;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	bool bIsTwinBlast;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	bool bIsNarbash;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	bool bIsRevenant;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	bool bIsShinibi;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	bool bIsZinx;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	bool bIsGideon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	bool bShooting;
 
@@ -153,7 +170,8 @@ public: //Variables
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combat | Projectile")
 	TSubclassOf<class AProjectileBase> ProjectileClass;
-
+	
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Combat")
 	bool bHasValidTarget;
 
 protected:
@@ -260,6 +278,8 @@ public:
 
 	void SetInterpToPlayer(bool Interp);
 
+	void InterpToPlayer();
+
 	AEnemyBase* SetEnemyRef_Implementation() override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
@@ -273,7 +293,7 @@ public:
 
 	bool Alive();
 
-	//static bool IsUltimateAttack();
+	bool AreAllEnemiesDead();
 
 
 

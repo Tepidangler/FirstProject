@@ -39,6 +39,11 @@ void AWeaponBase::BeginPlay()
 	CombatCollision->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	CombatCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CombatCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+	if (!Character)
+	{
+	//	Character = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	}
 }
 
 
@@ -48,6 +53,7 @@ void AWeaponBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 	if (WeaponState == EWeaponState::EWS_Pickup && OtherActor)
 	{
 		ACharacterBase* MC = Cast<ACharacterBase>(OtherActor);
+		Character = MC;
 		if (MC)
 		{
 			MC->SetActiveOverlappingItem(this);
@@ -94,7 +100,13 @@ void AWeaponBase::OnCombatCollisionOverlapBegin(UPrimitiveComponent* OverlappedC
 			}
 			if (DamageTypeClass)
 			{
-				UGameplayStatics::ApplyDamage(Enemy, Damage, WeaponInstigator, this, DamageTypeClass);
+				check(Character);
+				if (Character->bAttacking)
+				{
+					Character->bAttacking = false;
+					UGameplayStatics::ApplyDamage(Enemy, Damage, WeaponInstigator, this, DamageTypeClass);
+				}
+
 			}
 
 		}
@@ -109,13 +121,19 @@ void AWeaponBase::OnCombatCollisionOverlapEnd(UPrimitiveComponent* OverlappedCom
 
 void AWeaponBase::ActivateCollision()
 {
-	CombatCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	if (CombatCollision)
+	{
+		CombatCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
 
 }
 
 void AWeaponBase::DeactivateCollision()
 {
-	CombatCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (CombatCollision)
+	{
+		CombatCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AWeaponBase::Equip(ACharacterBase* Char)

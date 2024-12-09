@@ -11,6 +11,10 @@ struct FCharacterStats
 {
 	GENERATED_BODY()
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SaveGameData")
+	FString Date;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SaveGameData")
+	FString Time;
 	UPROPERTY(VisibleAnywhere,Category = "SaveGameData")
 	float Health;
 
@@ -32,11 +36,30 @@ struct FCharacterStats
 	UPROPERTY(VisibleAnywhere, Category = "SaveGameData")
 	FRotator Rotation;
 
-	UPROPERTY(VisibleAnywhere, Category = "SaveGameData")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SaveGameData")
 	FString MapName;
 
 	UPROPERTY(VisibleAnywhere, Category = "SaveGameData")
 	FString WeaponName;
+
+	UPROPERTY(VisibleAnywhere, Category = "SaveGameData")
+	bool bIsNewGame;
+};
+
+USTRUCT(BlueprintType)
+struct FEnemyInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, Category = "SaveGameData")
+	float Health;
+
+	UPROPERTY(VisibleAnywhere, Category = "SaveGameData")
+	FVector Location;
+
+	UPROPERTY(VisibleAnywhere, Category = "SaveGameData")
+	FRotator Rotation;
+
 };
 
 
@@ -49,6 +72,7 @@ class FIRSTPROJECT_API UFirstSaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
+// Variables
 
 	UFirstSaveGame();
 
@@ -56,7 +80,21 @@ public:
 	FString SlotName;
 	UPROPERTY(VisibleAnywhere, Category = Basic)
 	uint32 UserIndex;
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Basic)
 	FCharacterStats CharacterStats;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Basic)
+	int SlotNumber;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Basic)
+	//TArray<AEnemyBase*> Enemies;
+
+public:
+
+	//Functions
+
+	void CreateSlot(const FString& SaveSlotName, int SaveSlotNumber);
+
+	void CreateEmptySlot(int SaveSlotNumber);
+
+	FString GetSlotName();
 
 };

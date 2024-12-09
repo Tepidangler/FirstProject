@@ -28,10 +28,20 @@ enum class EStaminaStatus : uint8
 	ESS_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
+UENUM(BlueprintType)
+enum class ECombatStatus : uint8
+{
+	ECS_Normal UMETA(DisplayName = "Normal"),
+	ECS_InCombat UMETA(DisplayName = "InCombat"),
+
+	ECS_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
 UCLASS()
 class FIRSTPROJECT_API ACharacterBase : public ACharacter, public IFirstInterface
 {
 	GENERATED_BODY()
+
 
 public:
 	// Sets default values for this character's properties
@@ -68,6 +78,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enums")
 	EStaminaStatus StaminaStatus;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Enums")
+	ECombatStatus CombatStatus;
+
 	/** Camera boom positioning the camera behind the player */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -80,6 +93,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
 	UAnimMontage* LevelStartMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
+	UAnimMontage* AirCombatMontage;
 
 	/** Base turn rates to scale turning functions for the camera*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -117,7 +132,8 @@ public:
 
 	bool bIsComboStarted;
 
-	bool bAllowMovement;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+	bool bIsNewGame;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Particles")
 	class UParticleSystem* HitParticles;
@@ -134,9 +150,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Save Data")
 	TSubclassOf<class AItemStorage> WeaponStorage;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Save Data")
-	TArray<class UFirstSaveGame*> SavedGameArray;
-
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -152,6 +165,8 @@ public:
 	void MoveRight(float Value);
 
 	bool bMovingRight;
+
+	bool bSprinting;
 	/** Called via input to turn at a given rate
 	* @param Rate This is a normalized rate, ie 1.0 means 100% of desired turn rate
 	*/
@@ -178,6 +193,7 @@ public:
 	void SetMovementStatus(EMovementStatus Status);
 
 	FORCEINLINE EMovementStatus GetMovementStatus() { return MovementStatus; }
+	FORCEINLINE ECombatStatus GetCombatStatus() { return CombatStatus; }
 
 	//Press Shift Key to Start Sprinting
 	void ShiftKeyDown();
@@ -224,19 +240,14 @@ public:
 	UFUNCTION()
 	void UpdateCombatTarget();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void SwitchLevel(FName LevelName);
-
-	UFUNCTION(BlueprintCallable)
-	void SaveGame();
-	UFUNCTION(BlueprintCallable)
-	void LoadGame(bool bSetPosition);
 
 	ACharacterBase* SetPlayerRef_Implementation() override;
 
-
-	FORCEINLINE void SetAllowMovementStatus(bool Status) { bAllowMovement = Status; }
 	FORCEINLINE void SetStaminaStatus(EStaminaStatus Status) { StaminaStatus = Status; }
+
+	FORCEINLINE void SetCombatStatus(ECombatStatus Status) { CombatStatus = Status; }
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
